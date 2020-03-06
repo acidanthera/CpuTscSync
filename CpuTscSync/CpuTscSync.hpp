@@ -29,16 +29,6 @@ private:
 	static void xcpm_urgency(int urgency, uint64_t rt_period, uint64_t rt_deadline);
 	
 	/**
-	 *  Patch kext if needed and prepare other patches
-	 *
-	 *  @param patcher KernelPatcher instance
-	 *  @param index   kinfo handle
-	 *  @param address kinfo load address
-	 *  @param size    kinfo memory size
-	 */
-	void processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t address, size_t size);
-	
-	/**
 	 *  Patch kernel
 	 *
 	 *  @param patcher KernelPatcher instance
