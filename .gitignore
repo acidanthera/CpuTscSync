@@ -30,3 +30,15 @@
 *.exe
 *.out
 *.app
+
+# Other
+.DS_Store
+
+CpuTscSync.xcodeproj/xcuserdata
+CpuTscSync.xcodeproj/project.xcworkspace/xcuserdata
+CpuTscSync/.DS_Store
+
+Lilu.kext
+
+DerivedData
+
