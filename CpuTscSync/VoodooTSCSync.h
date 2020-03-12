@@ -4,7 +4,7 @@
  *
  */
 
-#include <IOKit/IOService.h>
+#include <Library/LegacyIOService.h>
 #include <IOKit/IOLib.h>
 #include <i386/proc_reg.h>
 

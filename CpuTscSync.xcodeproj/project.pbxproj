@@ -367,6 +367,7 @@
 				OTHER_LDFLAGS = "-static";
 				PRODUCT_BUNDLE_IDENTIFIER = org.lvs1974.driver.CpuTscSync;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
 				WRAPPER_EXTENSION = kext;
 			};
 			name = Debug;
@@ -414,6 +415,7 @@
 				OTHER_LDFLAGS = "-static";
 				PRODUCT_BUNDLE_IDENTIFIER = org.lvs1974.driver.CpuTscSync;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
 				STRIP_STYLE = "non-global";
 				WRAPPER_EXTENSION = kext;
 			};
