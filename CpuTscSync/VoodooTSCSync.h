@@ -19,12 +19,16 @@ class VoodooTSCSync : public IOService
     typedef IOService super;
     OSDeclareDefaultStructors(VoodooTSCSync)
 
-private:
-	void doTSC(void);
+public:
+	static void doTSC(void);
+    static bool isTscSynced() { return tsc_synced; };
 
 public:
     virtual IOService* probe(IOService* provider, SInt32* score) override;
     virtual bool start(IOService* provider) override;
     virtual void stop(IOService* provider) override;
     virtual IOReturn setPowerState(unsigned long powerStateOrdinal, IOService* whatDevice) override;
+    
+protected:
+    static bool tsc_synced;
 };

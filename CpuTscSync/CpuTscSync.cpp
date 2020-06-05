@@ -8,10 +8,9 @@
 #include <Headers/kern_api.hpp>
 
 #include "CpuTscSync.hpp"
+#include "VoodooTSCSync.h"
 
 static CpuTscSyncPlugin *callbackCpuf = nullptr;
-
-extern bool tsc_is_in_sync;
 
 void CpuTscSyncPlugin::init()
 {
@@ -25,10 +24,10 @@ void CpuTscSyncPlugin::init()
 
 void CpuTscSyncPlugin::xcpm_urgency(int urgency, uint64_t rt_period, uint64_t rt_deadline)
 {
-	if (!tsc_is_in_sync)
+	if (!VoodooTSCSync::isTscSynced())
 	{
-		DBGLOG("cputs", "xcpm_urgency is called when TSC presumably is not in sync, ignore call");
-		return;
+        VoodooTSCSync::doTSC();
+		SYSLOG("cputs", "xcpm_urgency is called when TSC presumably is not in sync, sync it");
 	}
 	
 	FunctionCast(xcpm_urgency, callbackCpuf->org_xcpm_urgency)(urgency, rt_period, rt_deadline);

@@ -1,9 +1,9 @@
-#include <libkern/version.h>
+#include <Headers/kern_util.hpp>
 #include "VoodooTSCSync.h"
 
 OSDefineMetaClassAndStructors(VoodooTSCSync, IOService)
 
-bool tsc_is_in_sync {false};
+bool VoodooTSCSync::tsc_synced {false};
 
 //stamp the tsc
 extern "C" void stamp_tsc(void *tscp)
@@ -33,10 +33,10 @@ static IOPMPowerState powerStates[2] =
 
 IOReturn VoodooTSCSync::setPowerState(unsigned long powerStateOrdinal, IOService *whatDevice )
 {
-	tsc_is_in_sync = false;
+	tsc_synced = false;
 
     if (powerStateOrdinal)
-        this->doTSC();
+        doTSC();
 	
     return IOPMAckImplied;
 }
@@ -53,7 +53,7 @@ bool VoodooTSCSync::start(IOService *provider)
 
     // announce version
     extern kmod_info_t kmod_info;
-    IOLog("VoodooTSCSync: Version %s starting on OS X Darwin %d.%d.\n", kmod_info.version, version_major, version_minor);
+    SYSLOG("cputs", "Version %s starting on OS X Darwin %d.%d.\n", kmod_info.version, version_major, version_minor);
 
     // place version/build info in ioreg properties RM,Build and RM,Version
     char buf[128];
@@ -75,9 +75,9 @@ bool VoodooTSCSync::start(IOService *provider)
 void VoodooTSCSync::doTSC()
 {
 	uint64_t tsc = rdtsc64();
-	IOLog("VoodooTSCSync: current tsc from rdtsc64() is %lld. Rendezvouing..\n", tsc);
+	SYSLOG("cputs", "current tsc from rdtsc64() is %lld. Rendezvouing..\n", tsc);
 	
 	// call the kernel function that will call this "action" on all cores/processors
 	mp_rendezvous_no_intrs(stamp_tsc, &tsc);
-	tsc_is_in_sync = true;
+	tsc_synced = true;
 }
