@@ -26,8 +26,8 @@ void CpuTscSyncPlugin::xcpm_urgency(int urgency, uint64_t rt_period, uint64_t rt
 {
 	if (!VoodooTSCSync::isTscSynced())
 	{
-        VoodooTSCSync::doTSC();
 		SYSLOG("cputs", "xcpm_urgency is called when TSC presumably is not in sync, sync it");
+        return;
 	}
 	
 	FunctionCast(xcpm_urgency, callbackCpuf->org_xcpm_urgency)(urgency, rt_period, rt_deadline);
