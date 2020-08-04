@@ -4,6 +4,8 @@
  *
  */
 
+#include <Headers/kern_atomic.hpp>
+
 #include <Library/LegacyIOService.h>
 #include <IOKit/IOLib.h>
 #include <i386/proc_reg.h>
@@ -31,5 +33,5 @@ public:
     virtual IOReturn setPowerState(unsigned long powerStateOrdinal, IOService* whatDevice) override;
     
 protected:
-    static bool tsc_synced;
+    static _Atomic(bool) tsc_synced;
 };

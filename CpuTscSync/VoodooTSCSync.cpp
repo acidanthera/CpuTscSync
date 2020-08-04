@@ -3,7 +3,7 @@
 
 OSDefineMetaClassAndStructors(VoodooTSCSync, IOService)
 
-bool VoodooTSCSync::tsc_synced {false};
+_Atomic(bool) VoodooTSCSync::tsc_synced = false;
 
 //stamp the tsc
 extern "C" void stamp_tsc(void *tscp)
