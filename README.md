@@ -1,7 +1,6 @@
 # CpuTscSync
+[![Build Status](https://travis-ci.com/acidanthera/CpuTscSync.svg?branch=master)](https://travis-ci.com/acidanthera/CpuTscSync)  
 It is a Lilu plugin, combining functionality of VoodooTSCSync and disabling xcpm_urgency if TSC is not in sync. It should solve some kernel panics after wake.
-
-
 
 #### Credits
 - [Apple](https://www.apple.com) for macOS  
