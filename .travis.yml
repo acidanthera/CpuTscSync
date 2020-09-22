@@ -1,0 +1,39 @@
+language: cpp
+
+env:
+  global:
+   - secure: "CRxK65M0viesmM5Qp48MWGMnDDiAvgJL8dkzmTCDIwYIwNzgHE47mppXhxAXiIUTwz1AX7ROsVTy3ZyIqxJpkXJPbz8hxxex4HcPcBUmxhBR3lSaFpCLTkcj1nU9wSkDu/rbh0q8Ju6z3T5nisfaIzHxmip9+Q2OOzygG/FdliGzLlMrDBcjPDzYvBKbb4RgEgstC3tn7b9o1sMSVqLd6VnhRQLt8dAL4ttYlm25rwFRMfJ8DL4MVZnz5lEiQ9r6g8ftdum+SGja/hFFEvGvqCxBER6y8BcUGH3AQ9Pcpt+qLis5l4MLi5eMrCtHiRvSDyFt2GkZBIhDhgcNnIz/xA+xgA02y2WxW576NKiCcKrAGrN4P4YO2pZf2GpcC6eyBO8iajCV0q1cbIcgqOqhqZZ/zNPDTdcvHE+JLnD31DTvcIXiTF74Pz8Z2XZIwb4sUSji1+mgG4f1XGVGR/Olbw+9zMk2BpWd+pBeXIEp469B7Ui+Rvu7+scgCh2e7CQSZeThCZyVRYA/oy+zwQQuR1H3zAcZRWvHltvrCb09W7FIG9AsECy6Wc3ly0vysUXEsnNOx1rbdKNw7hrPVTRqtvZfpBHb412FCCXLbAQKmpSQwBhWxt6/If0n04qtwyDtlQAL/9zl34wdv4hggpAK8UAEx1MVejLe/O8/XOToH14="
+
+matrix:
+  include:
+  - os: osx
+    name: "Build"
+    osx_image: xcode10.2
+    compiler: clang
+
+    script:
+      - git clone https://github.com/acidanthera/MacKernelSDK
+      - src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/Lilu/master/Lilu/Scripts/bootstrap.sh) && eval "$src" || exit 1
+      - xcodebuild -configuration Debug
+      - xcodebuild -configuration Release
+
+    deploy:
+      provider: releases
+      skip_cleanup: true
+      file: "build/*/*.zip"
+      file_glob: true
+      api_key:
+        secure: LfCAB7owE+p8KhUKefFUz9gfCoIrIr0o12B1vxeXH6ExsPoKhngjsvJVljuxHO/6GoXtmJvmq1qCVxSl7khbkE3QnW5Y6tVXonTdYKuCS6Ac5GPHCd8heY6JkVW6c+735AG6JAxDf9+IDQdf/1+a0/uzlBKr9pmg4s7YTEiebbnxPWzXflrGY4Fq33t4fi/eGIzgAjVy3y+2iHkvrMMNU7vZJ2DHjVxehTrBFZczyp10MepfS1fn74fesyH05ByU29zFtoR5+mNmsmOXh8Zhfwkr7hPwxfrLYfYT5nybD+rZ9HJCvCGYbpWRx9wJ+tuIocO4+7Q1/7q1sRX6cJI7gMDiCFqMDaQNvRLaowyMFd5YZdmPgSw07CMBdkeCVtLeUWEVwShMlRwuHP0JiLND54VORyWGp9D0SOlZZaKdWx/5tertfBXx06/CHd+g/iBXCer92x2fd+DuMxKuuC4jaq/zXlsmPLuMnO46JvU1Sbc+X4EvU5rr5z8eqgsFALsHmlm0x5Am6mNCObcR5p3i6ryZAYHnz1i7ebtHy9urSq0y3frw055mvm6Ky1YKhtgu3h8nb4AML7BiR+INeepQZjefYemrw8YkmyIDp4ljFgzp9RsanfLpQhTUsjfiRUh9e209V7YZJ5CL4cjoK3pS4uc/96IJzRag+zmVDSihX4w=
+      on:
+        tags: true
+
+  - os: osx
+    name: "Analyze Clang"
+    osx_image: xcode11
+    compiler: clang
+
+    script:
+      - git clone https://github.com/acidanthera/MacKernelSDK
+      - src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/Lilu/master/Lilu/Scripts/bootstrap.sh) && eval "$src" || exit 1
+      - xcodebuild analyze -quiet -scheme CpuTscSync -configuration Debug CLANG_ANALYZER_OUTPUT=plist-html CLANG_ANALYZER_OUTPUT_DIR="$(pwd)/clang-analyze" && [ "$(find clang-analyze -name "*.html")" = "" ]
+      - xcodebuild analyze -quiet -scheme CpuTscSync -configuration Release CLANG_ANALYZER_OUTPUT=plist-html CLANG_ANALYZER_OUTPUT_DIR="$(pwd)/clang-analyze" && [ "$(find clang-analyze -name "*.html")" = "" ]

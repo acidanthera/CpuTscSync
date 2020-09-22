@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		1C748C2D1C21952C0024EED2 /* kern_start.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C748C2C1C21952C0024EED2 /* kern_start.cpp */; };
-		CE405ED91E4A080700AA0B3D /* plugin_start.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CE405ED81E4A080700AA0B3D /* plugin_start.cpp */; };
 		CEBD8C191F372A4600BBCB85 /* CpuTscSync.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CEBD8C171F372A4600BBCB85 /* CpuTscSync.cpp */; };
 		CEBD8C1A1F372A4600BBCB85 /* CpuTscSync.hpp in Headers */ = {isa = PBXBuildFile; fileRef = CEBD8C181F372A4600BBCB85 /* CpuTscSync.hpp */; };
 		F6419886251A33AA00426196 /* libkmod.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F6419885251A33AA00426196 /* libkmod.a */; };
@@ -32,10 +31,8 @@
 		CE405EC01E49DD7100AA0B3D /* kern_policy.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = kern_policy.hpp; sourceTree = "<group>"; };
 		CE405EC31E49DD7100AA0B3D /* kern_user.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = kern_user.hpp; sourceTree = "<group>"; };
 		CE405EC41E49DD7100AA0B3D /* kern_util.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = kern_util.hpp; sourceTree = "<group>"; };
-		CE405EC61E49DD7100AA0B3D /* LegacyIOService.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LegacyIOService.h; sourceTree = "<group>"; };
 		CE405ECF1E49EC9100AA0B3D /* kern_config.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = kern_config.hpp; sourceTree = "<group>"; };
 		CE405ED21E49F9FC00AA0B3D /* kern_api.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = kern_api.hpp; sourceTree = "<group>"; };
-		CE405ED81E4A080700AA0B3D /* plugin_start.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = plugin_start.cpp; sourceTree = "<group>"; };
 		CE405EDA1E4A080F00AA0B3D /* plugin_start.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = plugin_start.hpp; sourceTree = "<group>"; };
 		CEBD8C171F372A4600BBCB85 /* CpuTscSync.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CpuTscSync.cpp; sourceTree = "<group>"; };
 		CEBD8C181F372A4600BBCB85 /* CpuTscSync.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = CpuTscSync.hpp; sourceTree = "<group>"; };
@@ -121,8 +118,6 @@
 			isa = PBXGroup;
 			children = (
 				F6419885251A33AA00426196 /* libkmod.a */,
-				CE405EC61E49DD7100AA0B3D /* LegacyIOService.h */,
-				CE405ED81E4A080700AA0B3D /* plugin_start.cpp */,
 			);
 			name = Library;
 			path = Lilu.kext/Contents/Resources/Library;
@@ -176,7 +171,7 @@
 		1C748C1E1C21952C0024EED2 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 1120;
+				LastUpgradeCheck = 1200;
 				ORGANIZATIONNAME = Acidanthera;
 				TargetAttributes = {
 					1C748C261C21952C0024EED2 = {
@@ -225,7 +220,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				CEBD8C191F372A4600BBCB85 /* CpuTscSync.cpp in Sources */,
-				CE405ED91E4A080700AA0B3D /* plugin_start.cpp in Sources */,
 				1C748C2D1C21952C0024EED2 /* kern_start.cpp in Sources */,
 				F659CFA524116C2C00E5B656 /* VoodooTSCSync.cpp in Sources */,
 			);

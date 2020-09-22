@@ -39,7 +39,9 @@ CpuTscSync.xcodeproj/project.xcworkspace/xcuserdata
 CpuTscSync/.DS_Store
 xcuserdata
 xcshareddata
+project.xcworkspace
 
 Lilu.kext
 DerivedData
 /MacKernelSDK
+build
