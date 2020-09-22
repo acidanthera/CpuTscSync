@@ -8,10 +8,10 @@
 
 /* Begin PBXBuildFile section */
 		1C748C2D1C21952C0024EED2 /* kern_start.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C748C2C1C21952C0024EED2 /* kern_start.cpp */; };
-		CE405EC91E49DD9700AA0B3D /* libkmod.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CE405EC71E49DD7100AA0B3D /* libkmod.a */; };
 		CE405ED91E4A080700AA0B3D /* plugin_start.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CE405ED81E4A080700AA0B3D /* plugin_start.cpp */; };
 		CEBD8C191F372A4600BBCB85 /* CpuTscSync.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CEBD8C171F372A4600BBCB85 /* CpuTscSync.cpp */; };
 		CEBD8C1A1F372A4600BBCB85 /* CpuTscSync.hpp in Headers */ = {isa = PBXBuildFile; fileRef = CEBD8C181F372A4600BBCB85 /* CpuTscSync.hpp */; };
+		F6419886251A33AA00426196 /* libkmod.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F6419885251A33AA00426196 /* libkmod.a */; };
 		F659CFA424116C2C00E5B656 /* VoodooTSCSync.h in Headers */ = {isa = PBXBuildFile; fileRef = F659CFA224116C2C00E5B656 /* VoodooTSCSync.h */; };
 		F659CFA524116C2C00E5B656 /* VoodooTSCSync.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F659CFA324116C2C00E5B656 /* VoodooTSCSync.cpp */; };
 /* End PBXBuildFile section */
@@ -33,13 +33,13 @@
 		CE405EC31E49DD7100AA0B3D /* kern_user.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = kern_user.hpp; sourceTree = "<group>"; };
 		CE405EC41E49DD7100AA0B3D /* kern_util.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = kern_util.hpp; sourceTree = "<group>"; };
 		CE405EC61E49DD7100AA0B3D /* LegacyIOService.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LegacyIOService.h; sourceTree = "<group>"; };
-		CE405EC71E49DD7100AA0B3D /* libkmod.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libkmod.a; sourceTree = "<group>"; };
 		CE405ECF1E49EC9100AA0B3D /* kern_config.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = kern_config.hpp; sourceTree = "<group>"; };
 		CE405ED21E49F9FC00AA0B3D /* kern_api.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = kern_api.hpp; sourceTree = "<group>"; };
 		CE405ED81E4A080700AA0B3D /* plugin_start.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = plugin_start.cpp; sourceTree = "<group>"; };
 		CE405EDA1E4A080F00AA0B3D /* plugin_start.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = plugin_start.hpp; sourceTree = "<group>"; };
 		CEBD8C171F372A4600BBCB85 /* CpuTscSync.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CpuTscSync.cpp; sourceTree = "<group>"; };
 		CEBD8C181F372A4600BBCB85 /* CpuTscSync.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = CpuTscSync.hpp; sourceTree = "<group>"; };
+		F6419885251A33AA00426196 /* libkmod.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libkmod.a; path = MacKernelSDK/Library/x86_64/libkmod.a; sourceTree = SOURCE_ROOT; };
 		F659CFA224116C2C00E5B656 /* VoodooTSCSync.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VoodooTSCSync.h; sourceTree = "<group>"; };
 		F659CFA324116C2C00E5B656 /* VoodooTSCSync.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = VoodooTSCSync.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -49,7 +49,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				CE405EC91E49DD9700AA0B3D /* libkmod.a in Frameworks */,
+				F6419886251A33AA00426196 /* libkmod.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -120,8 +120,8 @@
 		CE405EC51E49DD7100AA0B3D /* Library */ = {
 			isa = PBXGroup;
 			children = (
+				F6419885251A33AA00426196 /* libkmod.a */,
 				CE405EC61E49DD7100AA0B3D /* LegacyIOService.h */,
-				CE405EC71E49DD7100AA0B3D /* libkmod.a */,
 				CE405ED81E4A080700AA0B3D /* plugin_start.cpp */,
 			);
 			name = Library;
@@ -276,6 +276,8 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				KERNEL_EXTENSION_HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/MacKernelSDK/Headers";
+				KERNEL_FRAMEWORK_HEADERS = "$(PROJECT_DIR)/MacKernelSDK/Headers";
 				MACOSX_DEPLOYMENT_TARGET = 10.8;
 				MODULE_VERSION = "";
 				ONLY_ACTIVE_ARCH = YES;
@@ -321,6 +323,8 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				KERNEL_EXTENSION_HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/MacKernelSDK/Headers";
+				KERNEL_FRAMEWORK_HEADERS = "$(PROJECT_DIR)/MacKernelSDK/Headers";
 				MACOSX_DEPLOYMENT_TARGET = 10.8;
 				MODULE_VERSION = "";
 				SDKROOT = macosx;
@@ -344,16 +348,18 @@
 				);
 				HEADER_SEARCH_PATHS = "${PROJECT_DIR}/Lilu.kext/Contents/Resources";
 				INFOPLIST_FILE = CpuTscSync/Info.plist;
+				KERNEL_EXTENSION_HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/MacKernelSDK/Headers";
+				KERNEL_FRAMEWORK_HEADERS = "$(PROJECT_DIR)/MacKernelSDK/Headers";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"$(PROJECT_DIR)/Lilu.kext/Contents/Resources/Library",
+					"$(PROJECT_DIR)/MacKernelSDK/Library/x86_64",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.8;
 				MARKETING_VERSION = "";
 				MODULE_NAME = org.vanilla.driver.CpuTscSync;
 				MODULE_START = "$(PRODUCT_NAME)_kern_start";
 				MODULE_STOP = "$(PRODUCT_NAME)_kern_stop";
-				MODULE_VERSION = 1.0.2;
+				MODULE_VERSION = 1.0.3;
 				OTHER_CFLAGS = (
 					"-mmmx",
 					"-msse",
@@ -391,9 +397,11 @@
 				);
 				HEADER_SEARCH_PATHS = "${PROJECT_DIR}/Lilu.kext/Contents/Resources";
 				INFOPLIST_FILE = CpuTscSync/Info.plist;
+				KERNEL_EXTENSION_HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/MacKernelSDK/Headers";
+				KERNEL_FRAMEWORK_HEADERS = "$(PROJECT_DIR)/MacKernelSDK/Headers";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"$(PROJECT_DIR)/Lilu.kext/Contents/Resources/Library",
+					"$(PROJECT_DIR)/MacKernelSDK/Library/x86_64",
 				);
 				LLVM_LTO = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.8;
@@ -401,7 +409,7 @@
 				MODULE_NAME = org.vanilla.driver.CpuTscSync;
 				MODULE_START = "$(PRODUCT_NAME)_kern_start";
 				MODULE_STOP = "$(PRODUCT_NAME)_kern_stop";
-				MODULE_VERSION = 1.0.2;
+				MODULE_VERSION = 1.0.3;
 				OTHER_CFLAGS = (
 					"-mmmx",
 					"-msse",

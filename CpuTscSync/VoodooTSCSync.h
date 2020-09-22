@@ -4,9 +4,9 @@
  *
  */
 
-#include <Headers/kern_atomic.hpp>
+#include <stdatomic.h>
 
-#include <Library/LegacyIOService.h>
+#include <IOKit/IOService.h>
 #include <IOKit/IOLib.h>
 #include <i386/proc_reg.h>
 

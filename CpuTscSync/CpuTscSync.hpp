@@ -9,7 +9,7 @@
 #define kern_cputs_hpp
 
 #include <Headers/kern_patcher.hpp>
-#include <Library/LegacyIOService.h>
+#include <IOKit/IOService.h>
 
 class CpuTscSyncPlugin {
 public:
