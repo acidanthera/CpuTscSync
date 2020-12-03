@@ -1,5 +1,5 @@
 # CpuTscSync
-[![Build Status](https://github.com/acidanthera/CpuTscSync/workflows/CI/badge.svg?branch=master)](https://github.com/acidanthera/CpuTscSync/actions)
+[![Build Status](https://github.com/acidanthera/CpuTscSync/workflows/CI/badge.svg?branch=master)](https://github.com/acidanthera/CpuTscSync/actions) [![Scan Status](https://scan.coverity.com/projects/22194/badge.svg?flat=1)](https://scan.coverity.com/projects/22194)
 
 It is a Lilu plugin, combining functionality of VoodooTSCSync and disabling xcpm_urgency if TSC is not in sync. It should solve some kernel panics after wake.
 
