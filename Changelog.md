@@ -1,13 +1,13 @@
 CpuTscSync Changelog
 ===================
 #### v1.0.4
-- Added constants for 12.0 support
+- Added constants for macOS 12 support
 
 #### v1.0.3
 - Added MacKernelSDK with Xcode 12 compatibility
 
 #### v1.0.2
-- Compatibility for macOS BigSur 11.0 
+- Compatibility for macOS 11
 - Use atomic variable tsc_synced 
 
 #### v1.0.1
