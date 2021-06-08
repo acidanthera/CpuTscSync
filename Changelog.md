@@ -1,5 +1,7 @@
 CpuTscSync Changelog
 ===================
+#### v1.0.4
+- Added constants for 12.0 support
 
 #### v1.0.3
 - Added MacKernelSDK with Xcode 12 compatibility
