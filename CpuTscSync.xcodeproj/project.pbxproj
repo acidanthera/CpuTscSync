@@ -64,6 +64,7 @@
 				1C748C281C21952C0024EED2 /* Products */,
 			);
 			sourceTree = "<group>";
+			usesTabs = 0;
 		};
 		1C748C281C21952C0024EED2 /* Products */ = {
 			isa = PBXGroup;

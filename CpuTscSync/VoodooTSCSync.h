@@ -12,6 +12,7 @@
 
 //reg define
 #define MSR_IA32_TSC                    0x00000010
+#define MSR_IA32_TSC_ADJUST             0x0000003b
 
 //extern function defined in mp.c from xnu
 extern "C" void  mp_rendezvous_no_intrs(void (*action_func)(void*), void *arg);
@@ -22,7 +23,7 @@ class VoodooTSCSync : public IOService
     OSDeclareDefaultStructors(VoodooTSCSync)
 
 private:
-	static void doTSC(void);
+    static void doTSC(void);
 
 public:
     static bool isTscSynced() { return tsc_synced; };
