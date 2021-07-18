@@ -35,7 +35,7 @@ extern "C" void stamp_tsc_new(void *)
     }
 }
 
-extern "C"  void reset_tsc_adjust(void *)
+extern "C" void reset_tsc_adjust(void *)
 {
     wrmsr64(MSR_IA32_TSC_ADJUST, 0);
 }
@@ -51,9 +51,9 @@ IOService* VoodooTSCSync::probe(IOService* provider, SInt32* score)
     if (getKernelVersion() >= KernelVersion::Monterey) {
         // only attach to last CPU
         uint16_t threadCount = rdmsr64(MSR_CORE_THREAD_COUNT);
-        if (cpuNumber->unsigned16BitValue() != threadCount-1) return NULL;
+        if (cpuNumber->unsigned16BitValue() != 0) return NULL;
         DBGLOG("cputs", "discovered cpu with %u threads, matching last, syncing", threadCount);
-        mp_rendezvous_no_intrs(stamp_tsc_new, NULL);
+        mp_rendezvous_no_intrs(reset_tsc_adjust, NULL);
         DBGLOG("cputs", "done syncing");
         tsc_synced = true;
     } else {
@@ -117,7 +117,7 @@ void VoodooTSCSync::doTSC()
     if (getKernelVersion() >= KernelVersion::Monterey) {
         cores_ready = 0;
         tsc_frequency = 0;
-        mp_rendezvous_no_intrs(stamp_tsc_new, nullptr);
+        //mp_rendezvous_no_intrs(stamp_tsc_new, nullptr);
     } else {
         uint64_t tsc = rdtsc64();
         DBGLOG("cputs", "current tsc from rdtsc64() is %lld. Rendezvouing..\n", tsc);

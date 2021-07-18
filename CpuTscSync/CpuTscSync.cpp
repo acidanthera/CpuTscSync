@@ -33,13 +33,23 @@ void CpuTscSyncPlugin::xcpm_urgency(int urgency, uint64_t rt_period, uint64_t rt
 	FunctionCast(xcpm_urgency, callbackCpuf->org_xcpm_urgency)(urgency, rt_period, rt_deadline);
 }
 
+void CpuTscSyncPlugin::willEnterFullWake(void *pmRoot) {
+    mp_rendezvous_no_intrs(reset_tsc_adjust, NULL);
+    
+    FunctionCast(willEnterFullWake, callbackCpuf->orgWillEnterFullWake)(pmRoot);
+}
+
 void CpuTscSyncPlugin::processKernel(KernelPatcher &patcher)
 {
 	if (!kernel_routed)
 	{
-		KernelPatcher::RouteRequest request {"_xcpm_urgency", xcpm_urgency, org_xcpm_urgency};
-		if (!patcher.routeMultiple(KernelPatcher::KernelID, &request, 1))
-			SYSLOG("cputs", "patcher.routeMultiple for %s is failed with error %d", request.symbol, patcher.getError());
+        KernelPatcher::RouteRequest requests[] {
+            {"__ZN14IOPMrootDomain17willEnterFullWakeEv", willEnterFullWake, orgWillEnterFullWake},
+            {"_xcpm_urgency", xcpm_urgency, org_xcpm_urgency}
+        };
+        
+		if (!patcher.routeMultiple(KernelPatcher::KernelID, requests))
+			SYSLOG("cputs", "patcher.routeMultiple for %s is failed with error %d", requests[0].symbol, patcher.getError());
 		kernel_routed = true;
 	}
 

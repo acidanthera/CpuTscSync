@@ -16,6 +16,7 @@
 
 //extern function defined in mp.c from xnu
 extern "C" void  mp_rendezvous_no_intrs(void (*action_func)(void*), void *arg);
+extern "C" void reset_tsc_adjust(void *);
 
 class VoodooTSCSync : public IOService
 {
