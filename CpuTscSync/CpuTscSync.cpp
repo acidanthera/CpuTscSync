@@ -48,7 +48,7 @@ void CpuTscSyncPlugin::processKernel(KernelPatcher &patcher)
             {"_xcpm_urgency", xcpm_urgency, org_xcpm_urgency}
         };
         
-		if (!patcher.routeMultiple(KernelPatcher::KernelID, requests))
+		if (!patcher.routeMultipleLong(KernelPatcher::KernelID, requests))
 			SYSLOG("cputs", "patcher.routeMultiple for %s is failed with error %d", requests[0].symbol, patcher.getError());
 		kernel_routed = true;
 	}
