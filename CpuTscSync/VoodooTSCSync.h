@@ -15,8 +15,9 @@
 #define MSR_IA32_TSC_ADJUST             0x0000003b
 
 //extern function defined in mp.c from xnu
-extern "C" void  mp_rendezvous_no_intrs(void (*action_func)(void*), void *arg);
+extern "C" void mp_rendezvous_no_intrs(void (*action_func)(void*), void *arg);
 extern "C" void reset_tsc_adjust(void *);
+
 
 class VoodooTSCSync : public IOService
 {
@@ -27,13 +28,28 @@ private:
     static void doTSC(void);
 
 public:
-    static bool isTscSynced() { return tsc_synced; };
-
     virtual IOService* probe(IOService* provider, SInt32* score) override;
     virtual bool start(IOService* provider) override;
     virtual void stop(IOService* provider) override;
-    virtual IOReturn setPowerState(unsigned long powerStateOrdinal, IOService* whatDevice) override;
+    virtual IOReturn setPowerState(unsigned long state, IOService* whatDevice) override;
     
-protected:
+public:
     static _Atomic(bool) tsc_synced;
+    
+    /**
+     *  Power state name indexes
+     */
+    enum PowerState {
+        PowerStateOff,
+        PowerStateOn,
+        PowerStateMax
+    };
+
+    /**
+     *  Power states we monitor
+     */
+    IOPMPowerState powerStates[PowerStateMax]  {
+        {kIOPMPowerStateVersion1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {kIOPMPowerStateVersion1, kIOPMPowerOn | kIOPMDeviceUsable, kIOPMPowerOn, kIOPMPowerOn, 0, 0, 0, 0, 0, 0, 0, 0}
+    };
 };

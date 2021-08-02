@@ -24,12 +24,12 @@ extern "C" void stamp_tsc_new(void *)
     uint32_t cpu = cpu_number();
     if (cpu != 0) {
         uint64_t tsc = 0;
-        while ((tsc = atomic_load_explicit(&tsc_frequency, memory_order_relaxed)) == 0) {
+        while ((tsc = atomic_load_explicit(&tsc_frequency, memory_order_acquire)) == 0) {
         }
         wrmsr64(MSR_IA32_TSC, tsc);
     } else {
         uint16_t threadCount = rdmsr64(MSR_CORE_THREAD_COUNT);
-        while (atomic_load_explicit(&cores_ready, memory_order_relaxed) != threadCount) {
+        while (atomic_load_explicit(&cores_ready, memory_order_acquire) != threadCount) {
         }
         atomic_store_explicit(&tsc_frequency, rdtsc64(), memory_order_relaxed);
     }
@@ -65,17 +65,11 @@ IOService* VoodooTSCSync::probe(IOService* provider, SInt32* score)
     return this;
 }
 
-static IOPMPowerState powerStates[2] =
+IOReturn VoodooTSCSync::setPowerState(unsigned long state, IOService *whatDevice )
 {
-    { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-    { 1, kIOPMPowerOn, kIOPMPowerOn, kIOPMPowerOn, 0, 0, 0, 0, 0, 0, 0, 0 }
-};
-
-IOReturn VoodooTSCSync::setPowerState(unsigned long powerStateOrdinal, IOService *whatDevice )
-{
-    tsc_synced = false;
-
-    if (powerStateOrdinal)
+    if (state == PowerStateOff)
+        tsc_synced = false;
+    else if (state == PowerStateOn)
         doTSC();
 
     return IOPMAckImplied;
@@ -115,16 +109,22 @@ bool VoodooTSCSync::start(IOService *provider)
 void VoodooTSCSync::doTSC()
 {
     if (getKernelVersion() >= KernelVersion::Monterey) {
-        cores_ready = 0;
-        tsc_frequency = 0;
+        //cores_ready = 0;
+        //tsc_frequency = 0;
         //mp_rendezvous_no_intrs(stamp_tsc_new, nullptr);
+        //mp_rendezvous_no_intrs(reset_tsc_adjust, NULL);
+        //tsc_synced = true;
     } else {
+        // call the kernel function that will call this "action" on all cores/processors
+        //cores_ready = 0;
+        //tsc_frequency = 0;
+        //mp_rendezvous_no_intrs(stamp_tsc_new, NULL);
+        
         uint64_t tsc = rdtsc64();
         DBGLOG("cputs", "current tsc from rdtsc64() is %lld. Rendezvouing..\n", tsc);
 
         // call the kernel function that will call this "action" on all cores/processors
         mp_rendezvous_no_intrs(stamp_tsc, &tsc);
+        tsc_synced = true;
     }
-
-    tsc_synced = true;
 }

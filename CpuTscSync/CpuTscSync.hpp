@@ -22,13 +22,13 @@ private:
 	 *  Trampolines for original resource load callback
 	 */
 	mach_vm_address_t org_xcpm_urgency {0};
-    mach_vm_address_t orgWillEnterFullWake {0};
+    mach_vm_address_t orgIOHibernateSystemWake {0};
     
 	/**
 	 *  Hooked functions
 	 */
 	static void xcpm_urgency(int urgency, uint64_t rt_period, uint64_t rt_deadline);
-    static void willEnterFullWake(void *pmRoot);
+    static void IOHibernateSystemWake();
 	
 	/**
 	 *  Patch kernel

@@ -24,7 +24,7 @@ void CpuTscSyncPlugin::init()
 
 void CpuTscSyncPlugin::xcpm_urgency(int urgency, uint64_t rt_period, uint64_t rt_deadline)
 {
-	if (!VoodooTSCSync::isTscSynced())
+	if (!VoodooTSCSync::tsc_synced)
 	{
 		SYSLOG("cputs", "xcpm_urgency is called when TSC presumably is not in sync, sync it");
         return;
@@ -33,18 +33,25 @@ void CpuTscSyncPlugin::xcpm_urgency(int urgency, uint64_t rt_period, uint64_t rt
 	FunctionCast(xcpm_urgency, callbackCpuf->org_xcpm_urgency)(urgency, rt_period, rt_deadline);
 }
 
-void CpuTscSyncPlugin::willEnterFullWake(void *pmRoot) {
+void CpuTscSyncPlugin::IOHibernateSystemWake() {
     mp_rendezvous_no_intrs(reset_tsc_adjust, NULL);
+    VoodooTSCSync::tsc_synced = true;
     
-    FunctionCast(willEnterFullWake, callbackCpuf->orgWillEnterFullWake)(pmRoot);
+    FunctionCast(IOHibernateSystemWake, callbackCpuf->orgIOHibernateSystemWake)();
 }
 
 void CpuTscSyncPlugin::processKernel(KernelPatcher &patcher)
 {
 	if (!kernel_routed)
 	{
+        if (getKernelVersion() >= KernelVersion::Monterey) {
+            KernelPatcher::RouteRequest request {"_IOHibernateSystemWake", IOHibernateSystemWake, orgIOHibernateSystemWake};
+            
+            if (!patcher.routeMultipleLong(KernelPatcher::KernelID, &request, 1))
+                SYSLOG("cputs", "patcher.routeMultiple for %s is failed with error %d", request.symbol, patcher.getError());
+        }
+        
         KernelPatcher::RouteRequest requests[] {
-            {"__ZN14IOPMrootDomain17willEnterFullWakeEv", willEnterFullWake, orgWillEnterFullWake},
             {"_xcpm_urgency", xcpm_urgency, org_xcpm_urgency}
         };
         
