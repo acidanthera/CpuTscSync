@@ -108,21 +108,9 @@ bool VoodooTSCSync::start(IOService *provider)
 // Update MSR on all processors.
 void VoodooTSCSync::doTSC()
 {
-    if (getKernelVersion() >= KernelVersion::Monterey) {
-        //cores_ready = 0;
-        //tsc_frequency = 0;
-        //mp_rendezvous_no_intrs(stamp_tsc_new, nullptr);
-        //mp_rendezvous_no_intrs(reset_tsc_adjust, NULL);
-        //tsc_synced = true;
-    } else {
-        // call the kernel function that will call this "action" on all cores/processors
-        //cores_ready = 0;
-        //tsc_frequency = 0;
-        //mp_rendezvous_no_intrs(stamp_tsc_new, NULL);
-        
+    if (getKernelVersion() < KernelVersion::Monterey) {
         uint64_t tsc = rdtsc64();
         DBGLOG("cputs", "current tsc from rdtsc64() is %lld. Rendezvouing..\n", tsc);
-
         // call the kernel function that will call this "action" on all cores/processors
         mp_rendezvous_no_intrs(stamp_tsc, &tsc);
         tsc_synced = true;
