@@ -4,52 +4,13 @@
  *
  */
 
-#include <stdatomic.h>
-
 #include <IOKit/IOService.h>
-#include <IOKit/IOLib.h>
-#include <i386/proc_reg.h>
-
-//reg define
-#define MSR_IA32_TSC                    0x00000010
-#define MSR_IA32_TSC_ADJUST             0x0000003b
-
-//extern function defined in mp.c from xnu
-extern "C" void mp_rendezvous_no_intrs(void (*action_func)(void*), void *arg);
-extern "C" void reset_tsc_adjust(void *);
-
 
 class VoodooTSCSync : public IOService
 {
     typedef IOService super;
     OSDeclareDefaultStructors(VoodooTSCSync)
 
-private:
-    static void doTSC(void);
-
 public:
     virtual IOService* probe(IOService* provider, SInt32* score) override;
-    virtual bool start(IOService* provider) override;
-    virtual void stop(IOService* provider) override;
-    virtual IOReturn setPowerState(unsigned long state, IOService* whatDevice) override;
-    
-public:
-    static _Atomic(bool) tsc_synced;
-    
-    /**
-     *  Power state name indexes
-     */
-    enum PowerState {
-        PowerStateOff,
-        PowerStateOn,
-        PowerStateMax
-    };
-
-    /**
-     *  Power states we monitor
-     */
-    IOPMPowerState powerStates[PowerStateMax]  {
-        {kIOPMPowerStateVersion1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {kIOPMPowerStateVersion1, kIOPMPowerOn | kIOPMDeviceUsable, kIOPMPowerOn, kIOPMPowerOn, 0, 0, 0, 0, 0, 0, 0, 0}
-    };
 };
