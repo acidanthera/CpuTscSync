@@ -2,6 +2,7 @@ CpuTscSync Changelog
 ===================
 #### v1.0.4
 - Added constants for macOS 12 support
+- Added macOS 12 compatibility for CPUs with `MSR_IA32_TSC_ADJUST` (03Bh)
 
 #### v1.0.3
 - Added MacKernelSDK with Xcode 12 compatibility
