@@ -10,12 +10,15 @@
 #include <i386/proc_reg.h>
 #include <IOKit/IOTimerEventSource.h>
 
+
 #include "CpuTscSync.hpp"
 
 static CpuTscSyncPlugin *callbackCpuf = nullptr;
 _Atomic(bool) CpuTscSyncPlugin::tsc_synced = false;
+_Atomic(bool) CpuTscSyncPlugin::clock_get_calendar_called_after_wake = false;
 _Atomic(uint16_t) CpuTscSyncPlugin::cores_ready = 0;
 _Atomic(uint64_t) CpuTscSyncPlugin::tsc_frequency = 0;
+_Atomic(uint64_t) CpuTscSyncPlugin::xnu_thread_tid = -1UL;
 
 
 
@@ -62,6 +65,17 @@ void CpuTscSyncPlugin::tsc_adjust_or_reset()
     tsc_synced = true;
 }
 
+void CpuTscSyncPlugin::reset_sync_flag()
+{
+    tsc_synced = false;
+    xnu_thread_tid = -1UL;
+}
+
+bool CpuTscSyncPlugin::is_clock_get_calendar_called_after_wake()
+{
+    return clock_get_calendar_called_after_wake;
+}
+
 void CpuTscSyncPlugin::init()
 {
     callbackCpuf = this;
@@ -86,34 +100,58 @@ void CpuTscSyncPlugin::xcpm_urgency(int urgency, uint64_t rt_period, uint64_t rt
 IOReturn CpuTscSyncPlugin::IOHibernateSystemHasSlept()
 {
     tsc_synced = false;
+    xnu_thread_tid = -1UL;
     return FunctionCast(IOHibernateSystemHasSlept, callbackCpuf->orgIOHibernateSystemHasSlept)();
 }
 
 IOReturn CpuTscSyncPlugin::IOHibernateSystemWake()
 {
-    tsc_adjust_or_reset();
+    // post pone tsc sync in IOPMrootDomain::powerChangeDone,
+    // it will be executed later, after calculating wakeup time
+    tsc_synced = false;
+    xnu_thread_tid = thread_tid(current_thread());
+    DBGLOG("cputs", "IOHibernateSystemWake is called");
     return FunctionCast(IOHibernateSystemWake, callbackCpuf->orgIOHibernateSystemWake)();
+}
+
+void CpuTscSyncPlugin::clock_get_calendar_microtime(clock_sec_t *secs, clock_usec_t *microsecs)
+{
+    FunctionCast(clock_get_calendar_microtime, callbackCpuf->org_clock_get_calendar_microtime)(secs, microsecs);
+  
+    if (xnu_thread_tid == thread_tid(current_thread())) {
+        xnu_thread_tid = -1UL;
+        DBGLOG("cputs", "clock_get_calendar_microtime is called after wake");
+        tsc_adjust_or_reset();
+    }
 }
 
 void CpuTscSyncPlugin::processKernel(KernelPatcher &patcher)
 {
     if (!kernel_routed)
     {
+        clock_get_calendar_called_after_wake = (getKernelVersion() >= KernelVersion::ElCapitan);
+        if (clock_get_calendar_called_after_wake) {
+            DBGLOG("cputs", "_clock_get_calendar_microtime will be used to sync tsc after wake");
+        }
+        
         KernelPatcher::RouteRequest requests_for_long_jump[] {
-            {"_IOHibernateSystemWake", IOHibernateSystemWake, orgIOHibernateSystemWake},
-            {"_IOHibernateSystemHasSlept", IOHibernateSystemHasSlept, orgIOHibernateSystemHasSlept}
+            {"_IOHibernateSystemHasSlept", IOHibernateSystemHasSlept, orgIOHibernateSystemHasSlept},
+            {"_IOHibernateSystemWake", IOHibernateSystemWake, orgIOHibernateSystemWake}
         };
-            
-        if (!patcher.routeMultipleLong(KernelPatcher::KernelID, requests_for_long_jump))
+        
+        size_t size = arrsize(requests_for_long_jump) - (clock_get_calendar_called_after_wake ? 0 : 1);
+        if (!patcher.routeMultipleLong(KernelPatcher::KernelID, requests_for_long_jump, size))
             SYSLOG("cputs", "patcher.routeMultiple for %s is failed with error %d", requests_for_long_jump[0].symbol, patcher.getError());
         
         patcher.clearError();
         
         KernelPatcher::RouteRequest requests[] {
-            {"_xcpm_urgency", xcpm_urgency, org_xcpm_urgency}
+            {"_xcpm_urgency", xcpm_urgency, org_xcpm_urgency},
+            {"_clock_get_calendar_microtime", clock_get_calendar_microtime, org_clock_get_calendar_microtime }
         };
-        
-        if (!patcher.routeMultiple(KernelPatcher::KernelID, requests))
+
+        size = arrsize(requests) - (clock_get_calendar_called_after_wake ? 0 : 1);
+        if (!patcher.routeMultiple(KernelPatcher::KernelID, requests, size))
             SYSLOG("cputs", "patcher.routeMultiple for %s is failed with error %d", requests[0].symbol, patcher.getError());
         kernel_routed = true;
     }

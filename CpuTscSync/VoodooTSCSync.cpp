@@ -7,8 +7,8 @@ OSDefineMetaClassAndStructors(VoodooTSCSync, IOService)
 
 IOService* VoodooTSCSync::probe(IOService* provider, SInt32* score)
 {
-    if (!super::probe(provider, score)) return NULL;
     if (!provider) return NULL;
+    if (!super::probe(provider, score)) return NULL;
 
     OSNumber* cpuNumber = OSDynamicCast(OSNumber, provider->getProperty("IOCPUNumber"));
     if (!cpuNumber) return NULL;
@@ -25,4 +25,29 @@ IOService* VoodooTSCSync::probe(IOService* provider, SInt32* score)
     }
 
     return this;
+}
+
+bool VoodooTSCSync::start(IOService *provider) {
+    if (!IOService::start(provider)) {
+        SYSLOG("cputs", "failed to start the parent");
+        return false;
+    }
+
+    PMinit();
+    provider->joinPMtree(this);
+    registerPowerDriver(this, powerStates, arrsize(powerStates));
+
+    return true;
+}
+
+IOReturn VoodooTSCSync::setPowerState(unsigned long state, IOService *whatDevice){
+    DBGLOG("cputs", "changing power state to %lu", state);
+    if (!CpuTscSyncPlugin::is_clock_get_calendar_called_after_wake()) {
+        if (state == PowerStateOff)
+            CpuTscSyncPlugin::reset_sync_flag();
+        if (state == PowerStateOn)
+            CpuTscSyncPlugin::tsc_adjust_or_reset();
+    }
+
+    return kIOPMAckImplied;
 }

@@ -24,9 +24,11 @@ public:
 private:
     _Atomic(bool) kernel_routed = false;
     static _Atomic(bool) tsc_synced;
+    static _Atomic(bool) clock_get_calendar_called_after_wake;
     static _Atomic(uint16_t) cores_ready;
     static _Atomic(uint64_t) tsc_frequency;
-     
+    static _Atomic(uint64_t) xnu_thread_tid;
+    
 private:
 	/**
 	 *  Trampolines for original resource load callback
@@ -34,13 +36,15 @@ private:
 	mach_vm_address_t org_xcpm_urgency {0};
     mach_vm_address_t orgIOHibernateSystemHasSlept {0};
     mach_vm_address_t orgIOHibernateSystemWake {0};
-    
+    mach_vm_address_t org_clock_get_calendar_microtime {0};
+     
 	/**
 	 *  Hooked functions
 	 */
-	static void xcpm_urgency(int urgency, uint64_t rt_period, uint64_t rt_deadline);
+	static void     xcpm_urgency(int urgency, uint64_t rt_period, uint64_t rt_deadline);
     static IOReturn IOHibernateSystemHasSlept(void);
     static IOReturn IOHibernateSystemWake();
+    static void     clock_get_calendar_microtime(clock_sec_t *secs, clock_usec_t *microsecs);
  	
 	/**
 	 *  Patch kernel
@@ -56,6 +60,8 @@ private:
 
 public:
     static void tsc_adjust_or_reset();
+    static void reset_sync_flag();
+    static bool is_clock_get_calendar_called_after_wake();
 };
 
 #endif /* kern_cputs_hpp */
