@@ -5,7 +5,7 @@ It is a Lilu plugin, combining functionality of VoodooTSCSync and disabling xcpm
 
 **WARNING**: CPUs without `MSR_IA32_TSC_ADJUST` (03Bh) are currently unsupported on macOS 12 and newer.
 **WARNING**: if you still get kernel panic like "Non-monotonic time: invoke at 0xxxxxxxxxxx, runnable....", you can try to add `TSC_sync_margin=0` into your boot-args.
-See "CpuTscSync Monterey kernel panic on wake up #1900" for more details
+See [CpuTscSync Monterey kernel panic on wake up #1900" for more details](https://github.com/acidanthera/bugtracker/issues/1900)
 
 #### Credits
 - [Apple](https://www.apple.com) for macOS  
