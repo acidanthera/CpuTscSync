@@ -125,6 +125,13 @@ void CpuTscSyncPlugin::clock_get_calendar_microtime(clock_sec_t *secs, clock_use
     }
 }
 
+void CpuTscSyncPlugin::IOPlatformActionsPostResume(void)
+{
+    FunctionCast(IOPlatformActionsPostResume, callbackCpuf->orgIOPlatformActionsPostResume)();
+    DBGLOG("cputs", "IOPlatformActionsPostResume is called");
+    tsc_adjust_or_reset();
+}
+
 void CpuTscSyncPlugin::processKernel(KernelPatcher &patcher)
 {
     if (!kernel_routed)
@@ -153,6 +160,21 @@ void CpuTscSyncPlugin::processKernel(KernelPatcher &patcher)
         size = arrsize(requests) - (clock_get_calendar_called_after_wake ? 0 : 1);
         if (!patcher.routeMultiple(KernelPatcher::KernelID, requests, size))
             SYSLOG("cputs", "patcher.routeMultiple for %s is failed with error %d", requests[0].symbol, patcher.getError());
+
+        patcher.clearError();
+
+        if (patcher.solveSymbol(KernelPatcher::KernelID, "__Z27IOPlatformActionsPostResumev"))
+        {
+            KernelPatcher::RouteRequest requests[] {
+                {"__Z27IOPlatformActionsPostResumev", IOPlatformActionsPostResume, orgIOPlatformActionsPostResume}
+            };
+
+            if (!patcher.routeMultiple(KernelPatcher::KernelID, requests))
+                SYSLOG("cputs", "patcher.routeMultiple for %s is failed with error %d", requests[0].symbol, patcher.getError());
+        }
+
+        patcher.clearError();
+
         kernel_routed = true;
     }
 

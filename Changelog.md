@@ -1,5 +1,9 @@
 CpuTscSync Changelog
 ===================
+#### v1.0.6
+- Override one more kernel method `IOPlatformActionsPostResume` to perform sync as early as possible
+- README extended with an additional hint related to `TSC_sync_margin=0`
+
 #### v1.0.5
 - Fix issue with wakeup time: tsc sync is performed too early, so wakeup time can be incorrect, some app can crash with assertion failure: "currentTime >= wakeUpTime"
 - Revert back tsc sync in VoodooTSCSync::setPowerState as a fallback for older systems

@@ -37,6 +37,7 @@ private:
     mach_vm_address_t orgIOHibernateSystemHasSlept {0};
     mach_vm_address_t orgIOHibernateSystemWake {0};
     mach_vm_address_t org_clock_get_calendar_microtime {0};
+    mach_vm_address_t orgIOPlatformActionsPostResume {0};
      
 	/**
 	 *  Hooked functions
@@ -45,6 +46,7 @@ private:
     static IOReturn IOHibernateSystemHasSlept(void);
     static IOReturn IOHibernateSystemWake();
     static void     clock_get_calendar_microtime(clock_sec_t *secs, clock_usec_t *microsecs);
+    static void     IOPlatformActionsPostResume(void);
  	
 	/**
 	 *  Patch kernel
