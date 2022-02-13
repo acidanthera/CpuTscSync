@@ -7,6 +7,12 @@ It is a Lilu plugin, combining functionality of VoodooTSCSync and disabling xcpm
 **WARNING**: if you still get kernel panic like "Non-monotonic time: invoke at 0xxxxxxxxxxx, runnable....", you can try to add `TSC_sync_margin=0` into your boot-args.
 See [CpuTscSync Monterey kernel panic on wake up #1900" for more details](https://github.com/acidanthera/bugtracker/issues/1900)
 
+#### Boot-args
+- `-cputsdbg` turns on debugging output
+- `-cputsbeta` enables loading on unsupported osx
+- `-cputsoff` disables kext loading
+- `-cputsclock` forces using of method clock_get_calendar_microtime to sync TSC (the same method is used when boot-arg `TSC_sync_margin` is specified)
+
 #### Credits
 - [Apple](https://www.apple.com) for macOS  
 - [vit9696](https://github.com/vit9696) for [Lilu.kext](https://github.com/vit9696/Lilu)

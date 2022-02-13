@@ -15,10 +15,11 @@
 
 static CpuTscSyncPlugin *callbackCpuf = nullptr;
 _Atomic(bool) CpuTscSyncPlugin::tsc_synced = false;
-_Atomic(bool) CpuTscSyncPlugin::clock_get_calendar_called_after_wake = false;
+_Atomic(bool) CpuTscSyncPlugin::use_trace_point_method_to_sync = false;
+_Atomic(bool) CpuTscSyncPlugin::use_clock_get_calendar_to_sync = false;
+_Atomic(bool) CpuTscSyncPlugin::kernel_is_awake = false;
 _Atomic(uint16_t) CpuTscSyncPlugin::cores_ready = 0;
 _Atomic(uint64_t) CpuTscSyncPlugin::tsc_frequency = 0;
-_Atomic(uint64_t) CpuTscSyncPlugin::xnu_thread_tid = -1UL;
 
 
 
@@ -68,17 +69,20 @@ void CpuTscSyncPlugin::tsc_adjust_or_reset()
 void CpuTscSyncPlugin::reset_sync_flag()
 {
     tsc_synced = false;
-    xnu_thread_tid = -1UL;
 }
 
-bool CpuTscSyncPlugin::is_clock_get_calendar_called_after_wake()
+bool CpuTscSyncPlugin::is_non_legacy_method_used_to_sync()
 {
-    return clock_get_calendar_called_after_wake;
+    return use_trace_point_method_to_sync || use_clock_get_calendar_to_sync;
 }
 
 void CpuTscSyncPlugin::init()
 {
     callbackCpuf = this;
+    use_trace_point_method_to_sync = (getKernelVersion() >= KernelVersion::Lion);
+    use_clock_get_calendar_to_sync = (getKernelVersion() >= KernelVersion::ElCapitan) && (checkKernelArgument("TSC_sync_margin") || checkKernelArgument("-cputsclock"));
+    if (use_clock_get_calendar_to_sync)
+        use_trace_point_method_to_sync = false;
 
     lilu.onPatcherLoadForce(
         [](void *user, KernelPatcher &patcher) {
@@ -99,81 +103,67 @@ void CpuTscSyncPlugin::xcpm_urgency(int urgency, uint64_t rt_period, uint64_t rt
 
 IOReturn CpuTscSyncPlugin::IOHibernateSystemHasSlept()
 {
+    DBGLOG("cputs", "IOHibernateSystemHasSlept is called");
     tsc_synced = false;
-    xnu_thread_tid = -1UL;
+    kernel_is_awake = false;
     return FunctionCast(IOHibernateSystemHasSlept, callbackCpuf->orgIOHibernateSystemHasSlept)();
 }
 
-IOReturn CpuTscSyncPlugin::IOHibernateSystemWake()
+void CpuTscSyncPlugin::IOPMrootDomain_tracePoint( void *that, uint8_t point )
 {
-    // post pone tsc sync in IOPMrootDomain::powerChangeDone,
-    // it will be executed later, after calculating wakeup time
-    tsc_synced = false;
-    xnu_thread_tid = thread_tid(current_thread());
-    DBGLOG("cputs", "IOHibernateSystemWake is called");
-    return FunctionCast(IOHibernateSystemWake, callbackCpuf->orgIOHibernateSystemWake)();
+    if (callbackCpuf->use_trace_point_method_to_sync && point == kIOPMTracePointWakeCPUs) {
+        DBGLOG("cputs", "IOPMrootDomain::tracePoint with point = kIOPMTracePointWakeCPUs is called");
+        tsc_synced = false;
+        tsc_adjust_or_reset();
+    }
+    FunctionCast(IOPMrootDomain_tracePoint, callbackCpuf->orgIOPMrootDomain_tracePoint)(that, point);
+    kernel_is_awake = true;
 }
 
 void CpuTscSyncPlugin::clock_get_calendar_microtime(clock_sec_t *secs, clock_usec_t *microsecs)
 {
     FunctionCast(clock_get_calendar_microtime, callbackCpuf->org_clock_get_calendar_microtime)(secs, microsecs);
   
-    if (xnu_thread_tid == thread_tid(current_thread())) {
-        xnu_thread_tid = -1UL;
+    if (callbackCpuf->use_clock_get_calendar_to_sync && kernel_is_awake) {
         DBGLOG("cputs", "clock_get_calendar_microtime is called after wake");
         tsc_adjust_or_reset();
     }
-}
-
-void CpuTscSyncPlugin::IOPlatformActionsPostResume(void)
-{
-    FunctionCast(IOPlatformActionsPostResume, callbackCpuf->orgIOPlatformActionsPostResume)();
-    DBGLOG("cputs", "IOPlatformActionsPostResume is called");
-    tsc_adjust_or_reset();
 }
 
 void CpuTscSyncPlugin::processKernel(KernelPatcher &patcher)
 {
     if (!kernel_routed)
     {
-        clock_get_calendar_called_after_wake = (getKernelVersion() >= KernelVersion::ElCapitan);
-        if (clock_get_calendar_called_after_wake) {
-            DBGLOG("cputs", "_clock_get_calendar_microtime will be used to sync tsc after wake");
-        }
-        
         KernelPatcher::RouteRequest requests_for_long_jump[] {
             {"_IOHibernateSystemHasSlept", IOHibernateSystemHasSlept, orgIOHibernateSystemHasSlept},
-            {"_IOHibernateSystemWake", IOHibernateSystemWake, orgIOHibernateSystemWake}
         };
         
-        size_t size = arrsize(requests_for_long_jump) - (clock_get_calendar_called_after_wake ? 0 : 1);
-        if (!patcher.routeMultipleLong(KernelPatcher::KernelID, requests_for_long_jump, size))
+        if (!patcher.routeMultipleLong(KernelPatcher::KernelID, requests_for_long_jump, arrsize(requests_for_long_jump)))
             SYSLOG("cputs", "patcher.routeMultiple for %s is failed with error %d", requests_for_long_jump[0].symbol, patcher.getError());
         
         patcher.clearError();
         
         KernelPatcher::RouteRequest requests[] {
             {"_xcpm_urgency", xcpm_urgency, org_xcpm_urgency},
+            {"__ZN14IOPMrootDomain10tracePointEh", IOPMrootDomain_tracePoint, orgIOPMrootDomain_tracePoint},
             {"_clock_get_calendar_microtime", clock_get_calendar_microtime, org_clock_get_calendar_microtime }
         };
 
-        size = arrsize(requests) - (clock_get_calendar_called_after_wake ? 0 : 1);
+        size_t size = arrsize(requests) - (use_clock_get_calendar_to_sync ? 0 : 1);
         if (!patcher.routeMultiple(KernelPatcher::KernelID, requests, size))
             SYSLOG("cputs", "patcher.routeMultiple for %s is failed with error %d", requests[0].symbol, patcher.getError());
 
         patcher.clearError();
-
-        if (patcher.solveSymbol(KernelPatcher::KernelID, "__Z27IOPlatformActionsPostResumev"))
-        {
-            KernelPatcher::RouteRequest requests[] {
-                {"__Z27IOPlatformActionsPostResumev", IOPlatformActionsPostResume, orgIOPlatformActionsPostResume}
-            };
-
-            if (!patcher.routeMultiple(KernelPatcher::KernelID, requests))
-                SYSLOG("cputs", "patcher.routeMultiple for %s is failed with error %d", requests[0].symbol, patcher.getError());
+        
+        if (use_trace_point_method_to_sync) {
+            DBGLOG("cputs", "__ZN14IOPMrootDomain10tracePointEh method will be used to sync TSC after wake");
         }
-
-        patcher.clearError();
+        else if (use_clock_get_calendar_to_sync) {
+            DBGLOG("cputs", "_clock_get_calendar_microtime method will be used to sync TSC after wake");
+        }
+        else {
+            DBGLOG("cputs", "Legacy setPowerState method will be used to sync TSC after wake");
+        }
 
         kernel_routed = true;
     }

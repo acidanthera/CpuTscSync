@@ -16,6 +16,7 @@
 #define MSR_IA32_TSC                    0x00000010
 #define MSR_IA32_TSC_ADJUST             0x0000003b
 
+enum { kIOPMTracePointWakeCPUs  = 0x23 };
 
 class CpuTscSyncPlugin {
 public:
@@ -23,11 +24,12 @@ public:
 	
 private:
     _Atomic(bool) kernel_routed = false;
-    static _Atomic(bool) tsc_synced;
-    static _Atomic(bool) clock_get_calendar_called_after_wake;
+    static _Atomic(bool)     tsc_synced;
+    static _Atomic(bool)     use_trace_point_method_to_sync;
+    static _Atomic(bool)     use_clock_get_calendar_to_sync;
+    static _Atomic(bool)     kernel_is_awake;
     static _Atomic(uint16_t) cores_ready;
     static _Atomic(uint64_t) tsc_frequency;
-    static _Atomic(uint64_t) xnu_thread_tid;
     
 private:
 	/**
@@ -35,18 +37,16 @@ private:
 	 */
 	mach_vm_address_t org_xcpm_urgency {0};
     mach_vm_address_t orgIOHibernateSystemHasSlept {0};
-    mach_vm_address_t orgIOHibernateSystemWake {0};
+    mach_vm_address_t orgIOPMrootDomain_tracePoint {0};
     mach_vm_address_t org_clock_get_calendar_microtime {0};
-    mach_vm_address_t orgIOPlatformActionsPostResume {0};
-     
+    
 	/**
 	 *  Hooked functions
 	 */
 	static void     xcpm_urgency(int urgency, uint64_t rt_period, uint64_t rt_deadline);
     static IOReturn IOHibernateSystemHasSlept(void);
-    static IOReturn IOHibernateSystemWake();
+    static void     IOPMrootDomain_tracePoint( void *that, uint8_t point );
     static void     clock_get_calendar_microtime(clock_sec_t *secs, clock_usec_t *microsecs);
-    static void     IOPlatformActionsPostResume(void);
  	
 	/**
 	 *  Patch kernel
@@ -63,7 +63,7 @@ private:
 public:
     static void tsc_adjust_or_reset();
     static void reset_sync_flag();
-    static bool is_clock_get_calendar_called_after_wake();
+    static bool is_non_legacy_method_used_to_sync();
 };
 
 #endif /* kern_cputs_hpp */

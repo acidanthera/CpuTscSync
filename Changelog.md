@@ -1,5 +1,9 @@
 CpuTscSync Changelog
 ===================
+#### v1.0.7
+- Find a better place to sync TSC in the kernel (supported since 10.7)
+- boot-args `-cputsclock` or `TSC_sync_margin` can be used to select older method to sync TSC
+
 #### v1.0.6
 - Override one more kernel method `IOPlatformActionsPostResume` to perform sync as early as possible
 - README extended with an additional hint related to `TSC_sync_margin=0`

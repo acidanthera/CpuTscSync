@@ -41,8 +41,8 @@ bool VoodooTSCSync::start(IOService *provider) {
 }
 
 IOReturn VoodooTSCSync::setPowerState(unsigned long state, IOService *whatDevice){
-    DBGLOG("cputs", "changing power state to %lu", state);
-    if (!CpuTscSyncPlugin::is_clock_get_calendar_called_after_wake()) {
+    if (!CpuTscSyncPlugin::is_non_legacy_method_used_to_sync()) {
+        DBGLOG("cputs", "changing power state to %lu", state);
         if (state == PowerStateOff)
             CpuTscSyncPlugin::reset_sync_flag();
         if (state == PowerStateOn)
