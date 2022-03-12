@@ -1,5 +1,8 @@
 CpuTscSync Changelog
 ===================
+#### v1.0.8
+- Fix old sync logic used when boot-arg -cputsclock is specified
+
 #### v1.0.7
 - Find a better place to sync TSC in the kernel (supported since 10.7)
 - boot-args `-cputsclock` or `TSC_sync_margin` can be used to select older method to sync TSC

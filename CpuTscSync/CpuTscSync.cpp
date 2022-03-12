@@ -109,6 +109,13 @@ IOReturn CpuTscSyncPlugin::IOHibernateSystemHasSlept()
     return FunctionCast(IOHibernateSystemHasSlept, callbackCpuf->orgIOHibernateSystemHasSlept)();
 }
 
+IOReturn CpuTscSyncPlugin::IOHibernateSystemWake()
+{
+    IOReturn result = FunctionCast(IOHibernateSystemWake, callbackCpuf->orgIOHibernateSystemWake)();
+    kernel_is_awake = true;
+    return result;
+}
+
 void CpuTscSyncPlugin::IOPMrootDomain_tracePoint( void *that, uint8_t point )
 {
     if (callbackCpuf->use_trace_point_method_to_sync && point == kIOPMTracePointWakeCPUs) {
@@ -117,14 +124,16 @@ void CpuTscSyncPlugin::IOPMrootDomain_tracePoint( void *that, uint8_t point )
         tsc_adjust_or_reset();
     }
     FunctionCast(IOPMrootDomain_tracePoint, callbackCpuf->orgIOPMrootDomain_tracePoint)(that, point);
-    kernel_is_awake = true;
+    
+    if (callbackCpuf->use_trace_point_method_to_sync && point == kIOPMTracePointWakeCPUs)
+        kernel_is_awake = true;
 }
 
 void CpuTscSyncPlugin::clock_get_calendar_microtime(clock_sec_t *secs, clock_usec_t *microsecs)
 {
     FunctionCast(clock_get_calendar_microtime, callbackCpuf->org_clock_get_calendar_microtime)(secs, microsecs);
   
-    if (callbackCpuf->use_clock_get_calendar_to_sync && kernel_is_awake) {
+    if (callbackCpuf->use_clock_get_calendar_to_sync && !tsc_synced && kernel_is_awake) {
         DBGLOG("cputs", "clock_get_calendar_microtime is called after wake");
         tsc_adjust_or_reset();
     }
@@ -136,9 +145,11 @@ void CpuTscSyncPlugin::processKernel(KernelPatcher &patcher)
     {
         KernelPatcher::RouteRequest requests_for_long_jump[] {
             {"_IOHibernateSystemHasSlept", IOHibernateSystemHasSlept, orgIOHibernateSystemHasSlept},
+            {"_IOHibernateSystemWake", IOHibernateSystemWake, orgIOHibernateSystemWake}
         };
         
-        if (!patcher.routeMultipleLong(KernelPatcher::KernelID, requests_for_long_jump, arrsize(requests_for_long_jump)))
+        size_t size = arrsize(requests_for_long_jump) - (use_clock_get_calendar_to_sync ? 0 : 1);
+        if (!patcher.routeMultipleLong(KernelPatcher::KernelID, requests_for_long_jump, size))
             SYSLOG("cputs", "patcher.routeMultiple for %s is failed with error %d", requests_for_long_jump[0].symbol, patcher.getError());
         
         patcher.clearError();
@@ -149,7 +160,7 @@ void CpuTscSyncPlugin::processKernel(KernelPatcher &patcher)
             {"_clock_get_calendar_microtime", clock_get_calendar_microtime, org_clock_get_calendar_microtime }
         };
 
-        size_t size = arrsize(requests) - (use_clock_get_calendar_to_sync ? 0 : 1);
+        size = arrsize(requests) - (use_clock_get_calendar_to_sync ? 0 : 1);
         if (!patcher.routeMultiple(KernelPatcher::KernelID, requests, size))
             SYSLOG("cputs", "patcher.routeMultiple for %s is failed with error %d", requests[0].symbol, patcher.getError());
 

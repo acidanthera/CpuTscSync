@@ -37,6 +37,7 @@ private:
 	 */
 	mach_vm_address_t org_xcpm_urgency {0};
     mach_vm_address_t orgIOHibernateSystemHasSlept {0};
+    mach_vm_address_t orgIOHibernateSystemWake {0};
     mach_vm_address_t orgIOPMrootDomain_tracePoint {0};
     mach_vm_address_t org_clock_get_calendar_microtime {0};
     
@@ -44,7 +45,8 @@ private:
 	 *  Hooked functions
 	 */
 	static void     xcpm_urgency(int urgency, uint64_t rt_period, uint64_t rt_deadline);
-    static IOReturn IOHibernateSystemHasSlept(void);
+    static IOReturn IOHibernateSystemHasSlept();
+    static IOReturn IOHibernateSystemWake();
     static void     IOPMrootDomain_tracePoint( void *that, uint8_t point );
     static void     clock_get_calendar_microtime(clock_sec_t *secs, clock_usec_t *microsecs);
  	
