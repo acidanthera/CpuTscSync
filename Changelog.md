@@ -1,5 +1,8 @@
 CpuTscSync Changelog
 ===================
+#### v1.0.9
+- Added constants for macOS 13 support
+
 #### v1.0.8
 - Fix old sync logic used when boot-arg -cputsclock is specified
 
