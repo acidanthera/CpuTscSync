@@ -1,5 +1,8 @@
 CpuTscSync Changelog
 ===================
+#### v1.1.1
+- Added constants for macOS 15 support
+
 #### v1.1.0
 - Added constants for macOS 14 support
 
