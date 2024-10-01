@@ -143,9 +143,12 @@ void CpuTscSyncPlugin::processKernel(KernelPatcher &patcher)
 {
     if (!kernel_routed)
     {
+        const auto* io_hib_system_has_slept = (getKernelVersion() >= KernelVersion::Sequoia) ? "__Z25IOHibernateSystemHasSleptv" : "_IOHibernateSystemHasSlept";
+        const auto* io_hib_system_wake      = (getKernelVersion() >= KernelVersion::Sequoia) ? "__Z21IOHibernateSystemWakev"  : "_IOHibernateSystemWake";
+        
         KernelPatcher::RouteRequest requests_for_long_jump[] {
-            {"_IOHibernateSystemHasSlept", IOHibernateSystemHasSlept, orgIOHibernateSystemHasSlept},
-            {"_IOHibernateSystemWake", IOHibernateSystemWake, orgIOHibernateSystemWake}
+            {io_hib_system_has_slept, IOHibernateSystemHasSlept, orgIOHibernateSystemHasSlept},
+            {io_hib_system_wake, IOHibernateSystemWake, orgIOHibernateSystemWake}
         };
         
         size_t size = arrsize(requests_for_long_jump) - (use_clock_get_calendar_to_sync ? 0 : 1);
