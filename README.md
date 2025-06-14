@@ -9,7 +9,7 @@ See [CpuTscSync Monterey kernel panic on wake up #1900" for more details](https:
 
 #### Boot-args
 - `-cputsdbg` turns on debugging output
-- `-cputsbeta` enables loading on unsupported osx
+- `-cputsbeta` enables loading on unsupported macOS
 - `-cputsoff` disables kext loading
 - `-cputsclock` forces using of method clock_get_calendar_microtime to sync TSC (the same method is used when boot-arg `TSC_sync_margin` is specified)
 

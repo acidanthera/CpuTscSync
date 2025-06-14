@@ -1,5 +1,8 @@
 CpuTscSync Changelog
 ===================
+#### v1.1.2
+- Added constants for macOS 26 support
+
 #### v1.1.1
 - Added constants for macOS 15 support
 - Adapt code to make it work correclty in Sequoia
