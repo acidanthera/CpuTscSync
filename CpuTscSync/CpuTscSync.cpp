@@ -14,6 +14,7 @@
 #include "CpuTscSync.hpp"
 
 static CpuTscSyncPlugin *callbackCpuf = nullptr;
+_Atomic(bool) CpuTscSyncPlugin::kernel_routed = false;
 _Atomic(bool) CpuTscSyncPlugin::tsc_synced = false;
 _Atomic(bool) CpuTscSyncPlugin::use_trace_point_method_to_sync = false;
 _Atomic(bool) CpuTscSyncPlugin::use_clock_get_calendar_to_sync = false;

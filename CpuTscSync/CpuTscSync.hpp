@@ -23,7 +23,7 @@ public:
 	void init();
 	
 private:
-    _Atomic(bool) kernel_routed = false;
+    static _Atomic(bool)     kernel_routed;
     static _Atomic(bool)     tsc_synced;
     static _Atomic(bool)     use_trace_point_method_to_sync;
     static _Atomic(bool)     use_clock_get_calendar_to_sync;
